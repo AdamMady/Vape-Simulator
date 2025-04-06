@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vape Sim</title>
+  <link rel="icon" type="image/png" href="https://adammady.github.io/Vape-Simulator/icon.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    /* Style for the initial launcher page */
+    body.launcher {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Center vertically */
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+      font-family: Helvetica, Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      text-transform: lowercase;
+      padding: 20px;
+    }
+    .launcher-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 400px; /* Or adjust as needed */
+      padding: 30px; /* More padding for a single button */
+      background-color: #333333;
+      border-radius: 8px;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+    }
+    button.start-game-button {
+      cursor: pointer;
+      background-color: #6c757d; /* Same as submit button */
+      color: white;
+      border: none;
+      padding: 15px 30px; /* Make button larger */
+      border-radius: 5px;
+      font-size: 1.5rem; /* Larger font */
+      transition: background-color 0.3s;
+      width: auto; /* Auto width based on content */
+      box-sizing: border-box;
+    }
+    button.start-game-button:hover {
+      background-color: #5a6268;
+    }
+
+    /* Styles for when the game is loaded */
+    body.game-loaded {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Hide scrollbars */
+      background-color: #000; /* Black background behind iframe */
+    }
+    iframe.game-iframe {
+      display: block; /* Remove potential bottom space */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none; /* Remove iframe border */
+    }
+  </style>
+</head>
+<body class="launcher">
+
+  <div class="launcher-container">
+    <button id="startGameButton" class="start-game-button">start game</button>
+  </div>
+
+  <script>
+    const startGameButton = document.getElementById('startGameButton');
+    const gameUrl = 'https://adammady.github.io/Vape-Simulator/VapeSimulator.html';
+    const bodyElement = document.body;
+    const htmlElement = document.documentElement; // Use documentElement for fullscreen request
+
+    startGameButton.addEventListener('click', () => {
+      // 1. Attempt to enter fullscreen
+      requestFullscreenAndLoadGame();
+    });
+
+    function requestFullscreenAndLoadGame() {
+        let fullscreenPromise;
+
+        // Check for standard Fullscreen API support
+        if (htmlElement.requestFullscreen) {
+            fullscreenPromise = htmlElement.requestFullscreen();
+        }
+        // Check for vendor prefixes (optional for modern browsers but good practice)
+        else if (htmlElement.webkitRequestFullscreen) { /* Safari */
+            fullscreenPromise = htmlElement.webkitRequestFullscreen();
+        } else if (htmlElement.msRequestFullscreen) { /* IE11 */
+            fullscreenPromise = htmlElement.msRequestFullscreen();
+        } else {
+            // Fullscreen API not supported
+            console.warn('Fullscreen API is not supported by this browser.');
+            // Create a resolved promise to proceed directly to loading the game
+            fullscreenPromise = Promise.resolve();
+        }
+
+        // Handle the result of the fullscreen request
+        fullscreenPromise
+            .then(() => {
+                console.log('Entered fullscreen successfully (or API not supported/request skipped).');
+                loadGame(); // Load the game after attempting fullscreen
+            })
+            .catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                alert('Could not enter fullscreen mode, but the game will still load.'); // Inform user
+                loadGame(); // Load the game even if fullscreen fails
+            });
+    }
+
+
+    function loadGame() {
+      // 2. Clear the current body content
+      bodyElement.innerHTML = '';
+
+      // 3. Change body class and styles for the game view
+      bodyElement.classList.remove('launcher');
+      bodyElement.classList.add('game-loaded');
+
+      // 4. Create an iframe to load the game
+      const gameIframe = document.createElement('iframe');
+      gameIframe.setAttribute('src', gameUrl);
+      gameIframe.setAttribute('frameborder', '0'); // Optional: legacy attribute
+      gameIframe.setAttribute('allowfullscreen', 'true'); // Allow iframe content to go fullscreen if needed
+      gameIframe.classList.add('game-iframe'); // Apply specific iframe styles
+
+      // 5. Append the iframe to the (now empty) body
+      bodyElement.appendChild(gameIframe);
+    }
+  </script>
+
+</body>
+</html>
